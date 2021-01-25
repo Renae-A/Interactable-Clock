@@ -8,6 +8,8 @@ public class Clock : MonoBehaviour
 {
     private ClockManager clockManager;
 
+    // GameObjects that will be have their active state changed based on mode and format values
+
     private GameObject analog;                  // The Analog child object of Clock
 
     private GameObject analog_Time;              // The Analog numbers object for Time Display of Clock
@@ -20,19 +22,14 @@ public class Clock : MonoBehaviour
     private GameObject digital;                 // The Digital child object of Clock
 
     private GameObject digital_Numbers;
-    private TextMeshProUGUI numberText;
     private GameObject digital_Period;
-    private TextMeshProUGUI periodText;
 
     private GameObject hideableSettings;        // The Hideable Settings child object of Clock
 
     private GameObject mode;
-    private TMP_Dropdown modeDropdown;
 
     private GameObject timeFormat;
-    private TMP_Dropdown timeDropdown;
     private GameObject timerStopwatchFormat;
-    private TMP_Dropdown timerStopwatchDropdown;
 
     private GameObject setValues;
     private GameObject timeHourValue;
@@ -44,12 +41,36 @@ public class Clock : MonoBehaviour
     private GameObject startAndStop;
     private GameObject stopwatchSettings;
 
-   
+    // Important types with values that incur events and changes within the application
+    private TMP_Dropdown modeDropdown;
+    private TMP_Dropdown timeDropdown;
+    private TMP_Dropdown timerStopwatchDropdown;
 
+    private TMP_Dropdown timeHourDropdown;
+    private TMP_Dropdown timerStopwatchHourDropdown;
+    private TMP_Dropdown minuteDropdown;
+    private TMP_Dropdown secondDropdown;
+    private TMP_Dropdown periodDropdown;
+
+    private TextMeshProUGUI numberText;
+    private TextMeshProUGUI periodText;
+
+    private float time;
+    private float timer;
+    private float stopwatch;
+
+    private bool timerRunning;
+    private bool stopwatchRunning;
+
+    private AudioSource source;
+    public AudioClip timerSound;
 
     private void Awake()
     {
         clockManager = GetComponentInParent<ClockManager>();
+
+        source = GetComponent<AudioSource>();
+        source.clip = timerSound;
 
         // Organises and sets up all variables of the clock (saving the user from having to pass them in manually)
         Transform[] childTransforms = GetComponentsInChildren<Transform>();
@@ -130,6 +151,13 @@ public class Clock : MonoBehaviour
         modeDropdown = mode.GetComponent<TMP_Dropdown>();
         timeDropdown = timeFormat.GetComponent<TMP_Dropdown>();
         timerStopwatchDropdown = timerStopwatchFormat.GetComponent<TMP_Dropdown>();
+
+        timeHourDropdown = timeHourValue.GetComponent<TMP_Dropdown>();
+        timerStopwatchHourDropdown = timerStopwatchHourValue.GetComponent<TMP_Dropdown>();
+        minuteDropdown = minuteValue.GetComponent<TMP_Dropdown>();
+        secondDropdown = secondValue.GetComponent<TMP_Dropdown>();
+        periodDropdown = periodValue.GetComponent<TMP_Dropdown>();
+
         numberText = digital_Numbers.GetComponent<TextMeshProUGUI>();
         periodText = digital_Period.GetComponent<TextMeshProUGUI>();
     }
@@ -211,7 +239,7 @@ public class Clock : MonoBehaviour
 
                 SetTimerStopwatchFormat();
                 break;
-        }     
+        }
     }
 
     //	Changes whether the clock is analog or digital in a variety of time formats (hides/reveals appropriate objects).
@@ -221,29 +249,38 @@ public class Clock : MonoBehaviour
         {
             case "Analog":
                 digital.SetActive(false);
+                periodValue.SetActive(false);
                 analog.SetActive(true);
                 break;
             case "hh:mm (24hr)":
                 analog.SetActive(false);
                 digital_Period.SetActive(false);
+                periodValue.SetActive(false);
+                secondValue.SetActive(false);
                 digital.SetActive(true);
                 numberText.text = "hh:mm";
                 break;
             case "hh:mm (12hr)":
                 analog.SetActive(false);
                 digital_Period.SetActive(true);
+                periodValue.SetActive(true);
+                secondValue.SetActive(false);
                 digital.SetActive(true);
                 numberText.text = "hh:mm";
                 break;
             case "hh:mm:ss (24hr)":
                 analog.SetActive(false);
                 digital_Period.SetActive(false);
+                periodValue.SetActive(false);
+                secondValue.SetActive(true);
                 digital.SetActive(true);
                 numberText.text = "hh:mm:ss";
                 break;
             case "hh:mm:ss (12hr)":
                 analog.SetActive(false);
                 digital_Period.SetActive(true);
+                periodValue.SetActive(true);
+                secondValue.SetActive(true);
                 digital.SetActive(true);
                 numberText.text = "hh:mm:ss";
                 break;
@@ -257,6 +294,7 @@ public class Clock : MonoBehaviour
         {
             case "Analog":
                 digital.SetActive(false);
+                digital_Period.SetActive(true);
                 analog.SetActive(true);
                 break;
             case "Digital":
@@ -271,6 +309,21 @@ public class Clock : MonoBehaviour
                     numberText.text = "hh:mm:ss.SS";
                 break;
         }
+    }
+
+    public void SetValues()
+    {
+        if (modeDropdown.captionText.text == "Time Display")
+            time = (timeHourDropdown.value * 60 * 60) + (minuteDropdown.value * 60) + secondDropdown.value;
+
+        else
+            time = (timerStopwatchHourDropdown.value * 60 * 60) + (minuteDropdown.value * 60) + secondDropdown.value;
+    }
+
+
+    public void SetPeriod()
+    {
+        periodText.text = periodDropdown.captionText.text;
     }
 
     // Update is called once per frame
