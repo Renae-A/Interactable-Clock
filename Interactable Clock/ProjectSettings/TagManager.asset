@@ -3,7 +3,16 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Analog
+  - Analog Time
+  - Analog Timer
+  - Hour
+  - Minute
+  - Second
+  - Digital
+  - Digital Numbers
+  - Digital Period
   layers:
   - Default
   - TransparentFX
