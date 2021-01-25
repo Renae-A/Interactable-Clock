@@ -130,6 +130,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 283589710}
+  - component: {fileID: 283589711}
   m_Layer: 5
   m_Name: Clock Manager
   m_TagString: Untagged
@@ -157,6 +158,20 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &283589711
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 283589709}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 65a0632de04daa24ab3a79940442879b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  clockPrefab: {fileID: 7570018149070156860, guid: 9c1ebcdd26d448542babd7a921083e96,
+    type: 3}
 --- !u!224 &386942720 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7570018149070157251, guid: 9c1ebcdd26d448542babd7a921083e96,
@@ -379,6 +394,24 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 785864535}
   m_CullTransparentMesh: 0
+--- !u!1 &785867077 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7570018149070156860, guid: 9c1ebcdd26d448542babd7a921083e96,
+    type: 3}
+  m_PrefabInstance: {fileID: 7570018148716802755}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &785867078
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 785867077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 533da197384f55144a5c3cdfc8596bef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &786558105
 GameObject:
   m_ObjectHideFlags: 0
@@ -524,6 +557,7 @@ GameObject:
   - component: {fileID: 791120475}
   - component: {fileID: 791120474}
   - component: {fileID: 791120473}
+  - component: {fileID: 791120476}
   m_Layer: 5
   m_Name: Quit Button
   m_TagString: Untagged
@@ -593,7 +627,18 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 791120474}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 791120476}
+        m_MethodName: QuitApplication
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &791120474
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -631,6 +676,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 791120471}
   m_CullTransparentMesh: 0
+--- !u!114 &791120476
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 791120471}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 947e4114ded04b64599922f77bfdbbb7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &954762605
 GameObject:
   m_ObjectHideFlags: 0
@@ -712,7 +769,18 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 954762608}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 283589711}
+        m_MethodName: SpawnClock
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &954762608
 MonoBehaviour:
   m_ObjectHideFlags: 0
