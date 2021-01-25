@@ -13,6 +13,16 @@ TagManager:
   - Digital
   - Digital Numbers
   - Digital Period
+  - Hideable Settings
+  - Time Format
+  - Timer Format
+  - Stopwatch Settings
+  - Mode
+  - Hour Value
+  - Minute Value
+  - Second Value
+  - Period Value
+  - Start and Stop
   layers:
   - Default
   - TransparentFX
