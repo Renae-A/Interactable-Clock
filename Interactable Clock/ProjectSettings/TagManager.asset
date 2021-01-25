@@ -18,11 +18,13 @@ TagManager:
   - Timer Format
   - Stopwatch Settings
   - Mode
-  - Hour Value
   - Minute Value
   - Second Value
   - Period Value
   - Start and Stop
+  - Time Hour Value
+  - Timer Hour Value
+  - Set Values
   layers:
   - Default
   - TransparentFX
