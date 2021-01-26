@@ -462,7 +462,7 @@ public class Clock : MonoBehaviour
     private void RunClock()
     {
         time += Time.deltaTime;
-        Debug.Log(Time.deltaTime);
+        SetClockHands();
         SetNumberDisplay();
     }
 
@@ -497,7 +497,53 @@ public class Clock : MonoBehaviour
         SetNumberDisplay();
     }
 
-    // Displays the time, timer or stopwatch value as speficied format
+    // Displays the time, timer or stopwatch value as speficied format (analog)
+    private void SetClockHands()
+    {
+        Quaternion hourRotation = Quaternion.identity;
+        Quaternion minuteRotation = Quaternion.identity;
+        Quaternion secondRotation = Quaternion.identity;
+
+        switch (modeDropdown.captionText.text)
+        {
+            // Reference: https://www.youtube.com/watch?v=pbTysQw-WNs
+            case "Time Display":
+                // Hour hand
+                // 12 is used as the Time Display uses 12 hour intervals
+                analog_HourHand.transform.eulerAngles = new Vector3(0, 0, -(((time / (20 * 60)) / 12) / 360) * twelveHoursInSeconds);
+
+                // Minute hand
+                analog_MinuteHand.transform.eulerAngles = new Vector3(0, 0, -((time / (20 * 60)) / 360) * twelveHoursInSeconds);
+
+                // Second hand
+                analog_SecondHand.transform.eulerAngles = new Vector3(0, 0, -((time / 20) / 360) * twelveHoursInSeconds);
+                break;
+            case "Timer":
+                // Hour hand
+                // 12 is used as the Timer uses 60 hour intervals
+                analog_HourHand.transform.eulerAngles = new Vector3(0, 0, -(((timer / (20 * 60)) / 60) / 360) * twelveHoursInSeconds);
+
+                // Minute hand
+                analog_MinuteHand.transform.eulerAngles = new Vector3(0, 0, -((timer / (20 * 60)) / 360) * twelveHoursInSeconds);
+
+                // Second hand
+                analog_SecondHand.transform.eulerAngles = new Vector3(0, 0, -((timer / 20) / 360) * twelveHoursInSeconds);
+                break;
+            case "Stopwatch":
+                // Hour hand
+                // 12 is used as the Stopwatch uses 60 hour intervals
+                analog_HourHand.transform.eulerAngles = new Vector3(0, 0, -(((stopwatch / (20 * 60)) / 60) / 360) * twelveHoursInSeconds);
+
+                // Minute hand
+                analog_MinuteHand.transform.eulerAngles = new Vector3(0, 0, -((stopwatch / (20 * 60)) / 360) * twelveHoursInSeconds);
+
+                // Second hand
+                analog_SecondHand.transform.eulerAngles = new Vector3(0, 0, -((stopwatch / 20) / 360) * twelveHoursInSeconds);
+                break;
+        }
+    }
+
+    // Displays the time, timer or stopwatch value as speficied format (digital)
     private void SetNumberDisplay()
     {
         switch (modeDropdown.captionText.text)
