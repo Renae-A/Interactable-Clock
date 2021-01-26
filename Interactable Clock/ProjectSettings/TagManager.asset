@@ -22,9 +22,10 @@ TagManager:
   - Second Value
   - Period Value
   - Start and Stop
-  - Time Hour Value
   - Timer Hour Value
   - Set Values
+  - Time Hour 24
+  - Time Hour 12
   layers:
   - Default
   - TransparentFX
