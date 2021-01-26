@@ -447,7 +447,9 @@ public class Clock : MonoBehaviour
                 {
                     timer = 0;
                     numberText.text = "00:00:00";
+                    numberTransform.sizeDelta = new Vector2(mediumWidth, numberTransform.sizeDelta.y);
                 }
+                source.Stop();
                 timerRunning = false;
                 break;
             case "Stopwatch":
@@ -468,7 +470,17 @@ public class Clock : MonoBehaviour
     private void RunTimer()
     {
         timer -= Time.deltaTime;
+
+        if (timer <= 0)
+            if (!source.isPlaying)
+                TimerFinish();
+
         SetNumberDisplay();
+    }
+
+    private void TimerFinish()
+    {
+        source.Play();
     }
 
     // Add time passed to stopwatch value and display it on UI
@@ -541,8 +553,16 @@ public class Clock : MonoBehaviour
             case "Timer":
                 int timerInt = (int)timer;
 
-                numberText.text = string.Format("{0:D2}:{1:D2}:{2:D2}",
+                if (timerInt >= 0)
+                    numberText.text = string.Format("{0:D2}:{1:D2}:{2:D2}",
                                     ((timerInt / 60) / 60), ((timerInt / 60) % 60), (timerInt % 60));
+
+                else
+                {
+                    numberTransform.sizeDelta = new Vector2(mediumWidth + 8, numberTransform.sizeDelta.y);
+                    numberText.text = "-" + string.Format("{0:D2}:{1:D2}:{2:D2}",
+                                        (((timerInt / 60) / 60) * -1), (((timerInt / 60) % 60) * -1), ((timerInt % 60) * -1));
+                }
                 break;
             case "Stopwatch":
                 int stopwatchInt = (int)stopwatch;
