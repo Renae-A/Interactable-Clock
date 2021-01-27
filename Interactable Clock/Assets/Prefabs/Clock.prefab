@@ -1636,7 +1636,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 5981309571525682278}
-        m_MethodName: SetValues
+        m_MethodName: SetHour
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2426,7 +2426,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 5981309571525682278}
-        m_MethodName: SetValues
+        m_MethodName: SetHour
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4470,7 +4470,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 5981309571525682278}
-        m_MethodName: SetValues
+        m_MethodName: SetSeconds
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -11921,7 +11921,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 5981309571525682278}
-        m_MethodName: SetValues
+        m_MethodName: SetHour
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -14901,7 +14901,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 5981309571525682278}
-        m_MethodName: SetValues
+        m_MethodName: SetMinute
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

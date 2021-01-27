@@ -7,7 +7,7 @@ public class Draggable : MonoBehaviour, IDragHandler, IEndDragHandler
 {
     public Transform draggable;
 
-    // Reference: https://answers.unity.com/questions/1008678/i-cant-get-onmousedrag-to-work-with-gui-elements.html
+    // Use of IDragHandler, IEndDragHandler reference: https://answers.unity.com/questions/1008678/i-cant-get-onmousedrag-to-work-with-gui-elements.html
     // Moves the UI Clock’s current position to the desired position on canvas within window of application.
     public void OnDrag(PointerEventData eventData)
     {

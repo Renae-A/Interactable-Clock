@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+// Used for representing the current period (AM or PM)
 public enum TimePeriod
 {
     AM,
@@ -15,44 +16,45 @@ public class Clock : MonoBehaviour
     private ClockManager clockManager;
 
     // GameObjects that will be have their active state changed based on mode and format values
-
     private GameObject analog;                  // The Analog child object of Clock
 
-    private GameObject analog_Time;              // The Analog numbers object for Time Display of Clock
-    private GameObject analog_TimerStopwatch;    // The Analog numbers object for Timer and Stopwatch of Clock
+    private GameObject analog_Time;             // The Analog numbers object for Time Display of Clock
+    private GameObject analog_TimerStopwatch;   // The Analog numbers object for Timer and Stopwatch of Clock
 
-    private GameObject analog_HourHand;
-    private GameObject analog_MinuteHand;
-    private GameObject analog_SecondHand;
+    private GameObject analog_HourHand;         // The Analog hour hand object
+    private GameObject analog_MinuteHand;       // The Analog minute hand object
+    private GameObject analog_SecondHand;       // The Analog second hand object
 
     private GameObject digital;                 // The Digital child object of Clock
 
-    private GameObject digital_Numbers;
-    private GameObject digital_Period;
+    private GameObject digital_Numbers;         // The Digital numbers object for all modes' digital display
+    private GameObject digital_Period;          // The Digital period object for displaying the time period
 
     private GameObject hideableSettings;        // The Hideable Settings child object of Clock
 
-    private GameObject mode;
+    private GameObject mode;                    // The mode dropdown object
 
-    private GameObject timeFormat;
-    private GameObject timerStopwatchFormat;
+    private GameObject timeFormat;              // The format dropdown object used for Time Display mode
+    private GameObject timerStopwatchFormat;    // The format dropdown object used for Timer and Stopwatch modes
 
-    private GameObject setValues;
-    private GameObject timeHour12;
-    private GameObject timeHour24;
-    private GameObject timerStopwatchHourValue;
-    private GameObject minuteValue;
-    private GameObject secondValue;
-    private GameObject periodValue;
+    private GameObject setValues;               // The parent object containing the dropdown children for hour, minute and seconds
+    private GameObject timeHour12;              // The dropdown object for hours (up to 12)
+    private GameObject timeHour24;              // The dropdown object for hours (up to 24)
+    private GameObject timerStopwatchHourValue; // The dropdown object for hours (up to 60)
+    private GameObject minuteValue;             // The dropdown object for minutes
+    private GameObject secondValue;             // The dropdown object for seconds
+    private GameObject periodValue;             // The dropdown object for time period
 
-    private GameObject startAndStop;
-    private GameObject stopwatchSettings;
+    private GameObject startAndStop;            // The parent object containing the button children for start and stop
+    private GameObject stopwatchSettings;       // The reset button object
 
     // Important types with values that incur events and changes within the application
+    // Dropdowns for mode and format options
     private TMP_Dropdown modeDropdown;
     private TMP_Dropdown timeDropdown;
     private TMP_Dropdown timerStopwatchDropdown;
 
+    // Dropdowns for hour, minute, second and period values
     private TMP_Dropdown timeHour12Dropdown;
     private TMP_Dropdown timeHour24Dropdown;
     private TMP_Dropdown timerStopwatchHourDropdown;
@@ -60,29 +62,36 @@ public class Clock : MonoBehaviour
     private TMP_Dropdown secondDropdown;
     private TMP_Dropdown periodDropdown;
 
+    // Relevant for Text objects
     private TextMeshProUGUI numberText;
     private RectTransform numberTransform;
     private TextMeshProUGUI periodText;
 
+    // Values for time, timer and stopwatch (in seconds)
     private float time;
     private float timer;
     private float stopwatch;
 
+    // The current period of time (AM/PM)
+    private TimePeriod period;
+
+    // The bools that reflect if the clock's Time Display, Timer and Stopwatch is running or not
     private bool timeRunning;
     private bool timerRunning;
     private bool stopwatchRunning;
 
+    // Each width represents the needed rect transform width for 00:00, 00:00:00 and 00:00:00.00 formats
     private int shortWidth;
     private int mediumWidth;
     private int longWidth;
 
+    // Audio source and clip for timer alert
     private AudioSource source;
     public AudioClip timerSound;
 
-    private TimePeriod period;
-
     private const int twelveHoursInSeconds = 43200;
 
+    // Setup variables and find child objects by tag and setup all the GameObject member variables
     private void Awake()
     {
         clockManager = GetComponentInParent<ClockManager>();
@@ -184,6 +193,7 @@ public class Clock : MonoBehaviour
         numberTransform = numberText.GetComponent<RectTransform>();
         periodText = digital_Period.GetComponent<TextMeshProUGUI>();
 
+        // Set default values
         timeRunning = true;
         timerRunning = false;
         stopwatchRunning = false;
@@ -198,7 +208,7 @@ public class Clock : MonoBehaviour
 
         period = TimePeriod.AM;
 
-        // Reference: https://answers.unity.com/questions/970545/how-do-i-set-the-widthheight-of-a-ui-element.html
+        // Finding/using width of rect transform reference: https://answers.unity.com/questions/970545/how-do-i-set-the-widthheight-of-a-ui-element.html
         numberTransform.sizeDelta = new Vector2(mediumWidth, numberTransform.sizeDelta.y);
     }
 
@@ -206,6 +216,7 @@ public class Clock : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        // Setup for a default format Analog and mode Time Display
         analog_TimerStopwatch.SetActive(false);
         digital.SetActive(false);
         hideableSettings.SetActive(false);
@@ -290,49 +301,64 @@ public class Clock : MonoBehaviour
         switch (timeDropdown.captionText.text)
         {
             case "Analog":
+                // Turn off Digital objects
                 digital.SetActive(false);
                 periodValue.SetActive(false);
+                // Turn on Analog objects
                 analog.SetActive(true);
+                secondValue.SetActive(true);
                 break;
             case "hh:mm (24hr)":
+                // Turn off Analog objects
                 analog.SetActive(false);
+                // Turn off unnecessary digital objects
                 digital_Period.SetActive(false);
                 periodValue.SetActive(false);
                 secondValue.SetActive(false);
                 timeHour12.SetActive(false);
+                // Turn on format appropriate objects for digital clock
                 digital.SetActive(true);
                 timeHour24.SetActive(true);
-                numberTransform.sizeDelta = new Vector2(shortWidth, numberTransform.sizeDelta.y);
+                numberTransform.sizeDelta = new Vector2(shortWidth, numberTransform.sizeDelta.y);  // Resize digital number text width
                 break;
             case "hh:mm (12hr)":
+                // Turn off Analog objects
                 analog.SetActive(false);
+                // Turn off unnecessary digital objects
                 secondValue.SetActive(false);
                 timeHour24.SetActive(false);
+                // Turn on format appropriate objects for digital clock
                 digital_Period.SetActive(true);
                 periodValue.SetActive(true);
                 digital.SetActive(true);
                 timeHour12.SetActive(true);
-                numberTransform.sizeDelta = new Vector2(shortWidth, numberTransform.sizeDelta.y);
+                numberTransform.sizeDelta = new Vector2(shortWidth, numberTransform.sizeDelta.y);  // Resize digital number text width
                 break;
             case "hh:mm:ss (24hr)":
+                // Turn off Analog objects
                 analog.SetActive(false);
+                // Turn off unnecessary digital objects
                 digital_Period.SetActive(false);
                 periodValue.SetActive(false);
                 timeHour12.SetActive(false);
+                // Turn on format appropriate objects for digital clock
                 secondValue.SetActive(true);
                 digital.SetActive(true);
                 timeHour24.SetActive(true);
-                numberTransform.sizeDelta = new Vector2(mediumWidth, numberTransform.sizeDelta.y);
+                numberTransform.sizeDelta = new Vector2(mediumWidth, numberTransform.sizeDelta.y);  // Resize digital number text width
                 break;
             case "hh:mm:ss (12hr)":
+                // Turn off Analog objects
                 analog.SetActive(false);
+                // Turn off unnecessary digital objects
                 timeHour24.SetActive(false);
+                // Turn on format appropriate objects for digital clock
                 digital_Period.SetActive(true);
                 periodValue.SetActive(true);
                 secondValue.SetActive(true);
                 digital.SetActive(true);
                 timeHour12.SetActive(true);
-                numberTransform.sizeDelta = new Vector2(mediumWidth, numberTransform.sizeDelta.y);
+                numberTransform.sizeDelta = new Vector2(mediumWidth, numberTransform.sizeDelta.y);  // Resize digital number text width
                 break;
         }
     }
@@ -343,15 +369,22 @@ public class Clock : MonoBehaviour
         switch (timerStopwatchDropdown.captionText.text)
         {
             case "Analog":
+                // Turn off digital objects
                 digital.SetActive(false);
-                digital_Period.SetActive(true);
+                digital_Period.SetActive(false);
+                // Turn on analog objects
                 analog.SetActive(true);
+                secondValue.SetActive(true);
                 break;
             case "Digital":
+                // Turn off analog and uneeded digital objects
                 analog.SetActive(false);
                 digital_Period.SetActive(false);
+                // Turn on digital objects
                 digital.SetActive(true);
+                secondValue.SetActive(true);
 
+                // Adjust number text and its width depending on the relevent mode's format
                 if (modeDropdown.captionText.text == "Timer")
                 {
                     numberText.text = "00:00:00";
@@ -366,29 +399,98 @@ public class Clock : MonoBehaviour
         }
     }
 
-    // Calculates the hours, minutes and seconds values to seconds and sets either the time or timer value to this
-    public void SetValues()
+    // Calculates the new hour and current minutes and seconds values to seconds and sets either the time or timer value to this
+    public void SetHour()
     {
+        int newHour = 0;
+        int currentHour = 0;
+
         if (modeDropdown.captionText.text == "Time Display")
         {
+            currentHour = (int)(time / 60) / 60;
+            time -= currentHour * 60 * 60;   // Remove the current hour from time
+
+            // If the user is using the 12hr digital format for the Time Display
             if (timeHour12.activeSelf)
             {
+                // If the time period is AM, then set new hour normally using dropdown value
                 if (period == TimePeriod.AM)
-                    time = (timeHour12Dropdown.value * 60 * 60) + (minuteDropdown.value * 60) + secondDropdown.value;
+                    newHour = (timeHour12Dropdown.value * 60 * 60);
+                // If the time period is PM, then set new hour accounting for the additional 12 hours (being after midday) using dropdown value
                 else
-                    time = ((timeHour12Dropdown.value + 12) * 60 * 60) + (minuteDropdown.value * 60) + secondDropdown.value;
+                    newHour = ((timeHour12Dropdown.value + 12) * 60 * 60);
             }
-
-
+            // Setup normally for 24hrs
             else
-                time = (timeHour24Dropdown.value * 60 * 60) + (minuteDropdown.value * 60) + secondDropdown.value;
+                newHour = timeHour24Dropdown.value * 60 * 60;
         }
 
-
+        // Setup normally for timer, using dropdown value
         if (modeDropdown.captionText.text == "Timer")
-            timer = (timerStopwatchHourDropdown.value * 60 * 60) + (minuteDropdown.value * 60) + secondDropdown.value;
+        {
+            currentHour = (int)(timer / 60) / 60;
+            timer -= currentHour * 60 * 60;
+            newHour = timerStopwatchHourDropdown.value * 60 * 60;
+        }
+
+        SetValues(newHour, modeDropdown.captionText.text);
+    }
+
+    // Calculates the new minute and current hours and seconds values to seconds and sets either the time or timer value to this
+    public void SetMinute()
+    {
+        int newMinute = 0;
+        int currentMinute = 0;
+
+        if (modeDropdown.captionText.text == "Time Display")
+        {
+            currentMinute = (int)(time / 60) % 60;
+            time -= currentMinute * 60;
+        }
+
+        else if (modeDropdown.captionText.text == "Timer")
+        {
+            currentMinute = (int)(timer / 60) % 60;
+            timer -= currentMinute * 60;
+        }
+
+        newMinute = minuteDropdown.value * 60;
+
+        SetValues(newMinute, modeDropdown.captionText.text);
+    }
+
+    // Calculates the new seconds and current hours and minutes values to seconds and sets either the time or timer value to this
+    public void SetSeconds()
+    {
+        int newSeconds = 0;
+        int currentSeconds = 0;
+
+        if (modeDropdown.captionText.text == "Time Display")
+        {
+            currentSeconds = (int)time % 60;
+            time -= currentSeconds;
+        }
+        else if (modeDropdown.captionText.text == "Timer")
+        {
+            currentSeconds = (int)timer % 60;
+            timer -= currentSeconds;
+        }
+
+        newSeconds = secondDropdown.value;
+
+        SetValues(newSeconds, modeDropdown.captionText.text);
+    }
+
+    // Add the selected value to either time or timer
+    public void SetValues(int newValueToAdd, string modeSpecificValue)
+    {
+        if (modeSpecificValue == "Time Display")
+            time += newValueToAdd;
+        else
+            timer += newValueToAdd;
 
         SetNumberDisplay();
+        SetClockHands();
     }
 
     // Allows for the user to set whether the time period is AM or PM and displays the chosen option.
@@ -471,6 +573,7 @@ public class Clock : MonoBehaviour
     {
         timer -= Time.deltaTime;
 
+        // If the time has reached 0 and the alert has not already started playing, call TimerFinish to play alert
         if (timer <= 0)
             if (!source.isPlaying)
                 TimerFinish();
@@ -478,6 +581,7 @@ public class Clock : MonoBehaviour
         SetNumberDisplay();
     }
 
+    // Plays the AudioClip passed into this script (used for timer reaching 0)
     private void TimerFinish()
     {
         source.Play();
@@ -504,41 +608,47 @@ public class Clock : MonoBehaviour
         Quaternion minuteRotation = Quaternion.identity;
         Quaternion secondRotation = Quaternion.identity;
 
+        int fullRotationDegrees = 360;
+
+        // In the below equations, 60 is used to represent both minutes and seconds.
+        // While the 'multiplier' value of 20 was found through trial and error.
+        int multiplier = 20;
+
         switch (modeDropdown.captionText.text)
         {
-            // Reference: https://www.youtube.com/watch?v=pbTysQw-WNs
+            // Use of euler angles for clock hands reference: https://www.youtube.com/watch?v=pbTysQw-WNs
             case "Time Display":
                 // Hour hand
                 // 12 is used as the Time Display uses 12 hour intervals
-                analog_HourHand.transform.eulerAngles = new Vector3(0, 0, -(((time / (20 * 60)) / 12) / 360) * twelveHoursInSeconds);
+                analog_HourHand.transform.eulerAngles = new Vector3(0, 0, -(((time / (multiplier * 60)) / 12) / fullRotationDegrees) * twelveHoursInSeconds);
 
                 // Minute hand
-                analog_MinuteHand.transform.eulerAngles = new Vector3(0, 0, -((time / (20 * 60)) / 360) * twelveHoursInSeconds);
+                analog_MinuteHand.transform.eulerAngles = new Vector3(0, 0, -((time / (multiplier * 60)) / fullRotationDegrees) * twelveHoursInSeconds);
 
                 // Second hand
-                analog_SecondHand.transform.eulerAngles = new Vector3(0, 0, -((time / 20) / 360) * twelveHoursInSeconds);
+                analog_SecondHand.transform.eulerAngles = new Vector3(0, 0, -((time / multiplier) / fullRotationDegrees) * twelveHoursInSeconds);
                 break;
             case "Timer":
                 // Hour hand
                 // 12 is used as the Timer uses 60 hour intervals
-                analog_HourHand.transform.eulerAngles = new Vector3(0, 0, -(((timer / (20 * 60)) / 60) / 360) * twelveHoursInSeconds);
+                analog_HourHand.transform.eulerAngles = new Vector3(0, 0, -(((timer / (multiplier * 60)) / 60) / fullRotationDegrees) * twelveHoursInSeconds);
 
                 // Minute hand
-                analog_MinuteHand.transform.eulerAngles = new Vector3(0, 0, -((timer / (20 * 60)) / 360) * twelveHoursInSeconds);
+                analog_MinuteHand.transform.eulerAngles = new Vector3(0, 0, -((timer / (multiplier * 60)) / fullRotationDegrees) * twelveHoursInSeconds);
 
                 // Second hand
-                analog_SecondHand.transform.eulerAngles = new Vector3(0, 0, -((timer / 20) / 360) * twelveHoursInSeconds);
+                analog_SecondHand.transform.eulerAngles = new Vector3(0, 0, -((timer / multiplier) / fullRotationDegrees) * twelveHoursInSeconds);
                 break;
             case "Stopwatch":
                 // Hour hand
                 // 12 is used as the Stopwatch uses 60 hour intervals
-                analog_HourHand.transform.eulerAngles = new Vector3(0, 0, -(((stopwatch / (20 * 60)) / 60) / 360) * twelveHoursInSeconds);
+                analog_HourHand.transform.eulerAngles = new Vector3(0, 0, -(((stopwatch / (multiplier * 60)) / 60) / fullRotationDegrees) * twelveHoursInSeconds);
 
                 // Minute hand
-                analog_MinuteHand.transform.eulerAngles = new Vector3(0, 0, -((stopwatch / (20 * 60)) / 360) * twelveHoursInSeconds);
+                analog_MinuteHand.transform.eulerAngles = new Vector3(0, 0, -((stopwatch / (multiplier * 60)) / fullRotationDegrees) * twelveHoursInSeconds);
 
                 // Second hand
-                analog_SecondHand.transform.eulerAngles = new Vector3(0, 0, -((stopwatch / 20) / 360) * twelveHoursInSeconds);
+                analog_SecondHand.transform.eulerAngles = new Vector3(0, 0, -((stopwatch / multiplier) / fullRotationDegrees) * twelveHoursInSeconds);
                 break;
         }
     }
@@ -599,10 +709,12 @@ public class Clock : MonoBehaviour
             case "Timer":
                 int timerInt = (int)timer;
 
+                // Displays the timer value in 00:00:00 format if timer value is 0 or greater
                 if (timerInt >= 0)
                     numberText.text = string.Format("{0:D2}:{1:D2}:{2:D2}",
                                     ((timerInt / 60) / 60), ((timerInt / 60) % 60), (timerInt % 60));
 
+                // Displays the timer value in -00:00:00 format if timer value is less than 0 (uses negatives to stop 00:-12:-43 from occuring and adjusts text width for '-' symbol)
                 else
                 {
                     numberTransform.sizeDelta = new Vector2(mediumWidth + 8, numberTransform.sizeDelta.y);
@@ -613,11 +725,11 @@ public class Clock : MonoBehaviour
             case "Stopwatch":
                 int stopwatchInt = (int)stopwatch;
 
-                float stopwatchDecimals;
-                stopwatchDecimals = (stopwatch - stopwatchInt) * 100;
-
+                // Creating a variable where the decimal values of stopwatch can be used as an integer (needed for display code)
+                float stopwatchDecimals = (stopwatch - stopwatchInt) * 100;
                 int stopwatchIntDecimals = (int)stopwatchDecimals;
 
+                // Displays the stopwatch value in 00:00:00.00 format
                 numberText.text = string.Format("{0:D2}:{1:D2}:{2:D2}.{3:D2}",
                                     ((stopwatchInt / 60) / 60), ((stopwatchInt / 60) % 60), (stopwatchInt % 60), (stopwatchIntDecimals % 60));
                 break;
@@ -629,10 +741,12 @@ public class Clock : MonoBehaviour
     {
         int tempTime = timeInt + twelveHoursInSeconds;
 
+        // Uses tempTime (additional 12hrs added to time) while the hour is 0 to display 12:00
         if (((timeInt / 60) / 60) == 0)
             numberText.text = string.Format("{0:D2}:{1:D2}",
                        ((tempTime / 60) / 60), ((timeInt / 60) % 60));
-        
+
+        // Displays the actual time while the hour is not 0
         else
             numberText.text = string.Format("{0:D2}:{1:D2}",
                        ((timeInt / 60) / 60), ((timeInt / 60) % 60));
@@ -643,10 +757,12 @@ public class Clock : MonoBehaviour
     {
         int tempTime = timeInt + twelveHoursInSeconds;
 
+        // Uses tempTime (additional 12hrs added to time) while the hour is 0 to display 12:00:00
         if (((timeInt / 60) / 60) == 0)
             numberText.text = string.Format("{0:D2}:{1:D2}:{2:D2}",
                 ((tempTime / 60) / 60), ((timeInt / 60) % 60), (timeInt % 60));
-        
+
+        // Displays the actual time while the hour is not 0
         else
             numberText.text = string.Format("{0:D2}:{1:D2}:{2:D2}",
                 ((timeInt / 60) / 60), ((timeInt / 60) % 60), (timeInt % 60));
