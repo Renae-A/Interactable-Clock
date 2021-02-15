@@ -584,7 +584,6 @@ public class Clock : MonoBehaviour
                 {
                     timer = 0;
                     numberText.text = ZeroTimer;
-                    numberTransform.sizeDelta = new Vector2(MediumWidth, numberTransform.sizeDelta.y);
                 }
                 source.Stop();
                 timerRunning = false;
@@ -619,6 +618,8 @@ public class Clock : MonoBehaviour
     // Plays the AudioClip passed into this script (used for timer reaching 0)
     private void TimerFinish()
     {
+        timer = 0;
+        timerRunning = false;
         source.Play();
     }
 
@@ -739,14 +740,6 @@ public class Clock : MonoBehaviour
                 if (timerInt >= 0)
                     numberText.text = string.Format(HourMinuteSecondDisplay,
                                     ((timerInt / SecondsInMinute) / MinutesInHour), ((timerInt / SecondsInMinute) % MinutesInHour), (timerInt % SecondsInMinute));
-
-                // Displays the timer value in -00:00:00 format if timer value is less than 0 (uses negatives to stop 00:-12:-43 from occuring and adjusts text width for '-' symbol)
-                else
-                {
-                    numberTransform.sizeDelta = new Vector2(MediumWidth + 8, numberTransform.sizeDelta.y);
-                    numberText.text = "-" + string.Format(HourMinuteSecondDisplay,
-                                        (((timerInt / SecondsInMinute) / MinutesInHour) * -1), (((timerInt / SecondsInMinute) % MinutesInHour) * -1), ((timerInt % SecondsInMinute) * -1));
-                }
                 break;
             case StopwatchMode:
                 int stopwatchInt = (int)stopwatch;
