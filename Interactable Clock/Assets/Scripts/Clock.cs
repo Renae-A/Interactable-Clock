@@ -132,6 +132,7 @@ public class Clock : MonoBehaviour
     private void Awake()
     {
         clockManager = GetComponentInParent<ClockManager>();
+        clockManager.GenerateNewPosition(gameObject);
 
         source = GetComponent<AudioSource>();
         source.clip = timerSound;
@@ -244,7 +245,6 @@ public class Clock : MonoBehaviour
         // Finding/using width of rect transform reference: https://answers.unity.com/questions/970545/how-do-i-set-the-widthheight-of-a-ui-element.html
         numberTransform.sizeDelta = new Vector2(MediumWidth, numberTransform.sizeDelta.y);
     }
-
 
     // Start is called before the first frame update
     void Start()
@@ -688,8 +688,6 @@ public class Clock : MonoBehaviour
         analog_MinuteHand.transform.eulerAngles = new Vector3(0, 0, -((modeValue / (ClockMultiplier * SecondsInMinute)) / FullRotationDegrees) * TwelveHoursInSeconds);
         // Second hand
         analog_SecondHand.transform.eulerAngles = new Vector3(0, 0, -((modeValue / ClockMultiplier) / FullRotationDegrees) * TwelveHoursInSeconds);
-
-        Debug.Log(time);
     }
 
     // Displays the time, timer or stopwatch value as speficied format (digital)
