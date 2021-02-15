@@ -127,7 +127,7 @@ public class Clock : MonoBehaviour
     private const int ShortWidth = 37;
     private const int MediumWidth = 57;
     private const int LongWidth = 77;
-
+    
     // Setup variables and find child objects by tag and setup all the GameObject member variables
     private void Awake()
     {
@@ -438,12 +438,10 @@ public class Clock : MonoBehaviour
     public void SetHour()
     {
         int newHour = 0;
-        int currentHour = 0;
 
         if (modeDropdown.captionText.text == TimeDisplayMode)
         {
-            currentHour = (int)(time / MinutesInHour) / SecondsInMinute;    // In seconds
-            time -= currentHour * MinutesInHour * SecondsInMinute;   // Remove the current hour from time
+            time = RemoveCurrentHour(time);
 
             // If the user is using the 12hr digital format for the Time Display
             if (timeHour12.activeSelf)
@@ -461,59 +459,79 @@ public class Clock : MonoBehaviour
         }
 
         // Setup normally for timer, using dropdown value
-        if (modeDropdown.captionText.text == TimerMode)
+        else if (modeDropdown.captionText.text == TimerMode)
         {
-            currentHour = (int)(timer / MinutesInHour) / SecondsInMinute;
-            timer -= currentHour * MinutesInHour * SecondsInMinute;
+            timer = RemoveCurrentHour(timer);
             newHour = timerStopwatchHourDropdown.value * MinutesInHour * SecondsInMinute;
         }
 
         SetValues(newHour, modeDropdown.captionText.text);
     }
 
+    // Calculates the new hour and current minutes and seconds values to seconds and sets either the time or timer value to this
+    private float RemoveCurrentHour(float modeValue)
+    {
+        int currentHour = 0;
+
+        currentHour = (int)(modeValue / MinutesInHour) / SecondsInMinute;    // In seconds
+        modeValue -= currentHour * MinutesInHour * SecondsInMinute;   // Remove the current hour from value
+
+        return modeValue;
+    }
+
     // Calculates the new minute and current hours and seconds values to seconds and sets either the time or timer value to this
     public void SetMinute()
     {
         int newMinute = 0;
-        int currentMinute = 0;
-
+       
         if (modeDropdown.captionText.text == TimeDisplayMode)
-        {
-            currentMinute = (int)(time / MinutesInHour) % SecondsInMinute;
-            time -= currentMinute * SecondsInMinute;
-        }
-
+            time = RemoveCurrentMinute(time);
+        
         else if (modeDropdown.captionText.text == TimerMode)
-        {
-            currentMinute = (int)(timer / MinutesInHour) % SecondsInMinute;
-            timer -= currentMinute * SecondsInMinute;
-        }
+            timer = RemoveCurrentMinute(timer);
 
         newMinute = minuteDropdown.value * SecondsInMinute;
 
         SetValues(newMinute, modeDropdown.captionText.text);
     }
 
+    // Calculates the new minute and current hours and seconds values to seconds and sets either the time or timer value to this
+    private float RemoveCurrentMinute(float modeValue)
+    {
+        int currentMinute = 0;
+
+        currentMinute = (int)(modeValue / MinutesInHour) % SecondsInMinute;
+        modeValue -= currentMinute * SecondsInMinute;
+
+        return modeValue;
+    }
+
+
     // Calculates the new seconds and current hours and minutes values to seconds and sets either the time or timer value to this
     public void SetSeconds()
     {
         int newSeconds = 0;
-        int currentSeconds = 0;
 
         if (modeDropdown.captionText.text == TimeDisplayMode)
-        {
-            currentSeconds = (int)time % SecondsInMinute;
-            time -= currentSeconds;
-        }
+            time = RemoveCurrentSecond(time);
+
         else if (modeDropdown.captionText.text == TimerMode)
-        {
-            currentSeconds = (int)timer % SecondsInMinute;
-            timer -= currentSeconds;
-        }
+            timer = RemoveCurrentSecond(timer);
 
         newSeconds = secondDropdown.value;
 
         SetValues(newSeconds, modeDropdown.captionText.text);
+    }
+
+    // Calculates the new seconds and current hours and minutes values to seconds and sets either the time or timer value to this
+    private float RemoveCurrentSecond(float modeValue)
+    {
+        int currentSeconds = 0;
+
+        currentSeconds = (int)modeValue % SecondsInMinute;
+        modeValue -= currentSeconds;
+
+        return modeValue;
     }
 
     // Add the selected value to either time or timer
@@ -644,43 +662,34 @@ public class Clock : MonoBehaviour
         Quaternion minuteRotation = Quaternion.identity;
         Quaternion secondRotation = Quaternion.identity;
 
+        float modeValue = 0;
+        float segmentValue = 0;
+
         switch (modeDropdown.captionText.text)
         {
-            // Use of euler angles for clock hands reference: https://www.youtube.com/watch?v=pbTysQw-WNs
             case TimeDisplayMode:
-                // Hour hand
-                // 12 is used as the Time Display uses 12 hour intervals
-                analog_HourHand.transform.eulerAngles = new Vector3(0, 0, -(((time / (ClockMultiplier * MinutesInHour)) / HoursOnClock) / FullRotationDegrees) * TwelveHoursInSeconds);
-
-                // Minute hand
-                analog_MinuteHand.transform.eulerAngles = new Vector3(0, 0, -((time / (ClockMultiplier * SecondsInMinute)) / FullRotationDegrees) * TwelveHoursInSeconds);
-
-                // Second hand
-                analog_SecondHand.transform.eulerAngles = new Vector3(0, 0, -((time / ClockMultiplier) / FullRotationDegrees) * TwelveHoursInSeconds);
+                modeValue = time;
+                segmentValue = HoursOnClock;
                 break;
             case TimerMode:
-                // Hour hand
-                // 12 is used as the Timer uses 60 hour intervals
-                analog_HourHand.transform.eulerAngles = new Vector3(0, 0, -(((timer / (ClockMultiplier * MinutesInHour)) / HoursOnTimerStopwatch) / FullRotationDegrees) * TwelveHoursInSeconds);
-
-                // Minute hand
-                analog_MinuteHand.transform.eulerAngles = new Vector3(0, 0, -((timer / (ClockMultiplier * SecondsInMinute)) / FullRotationDegrees) * TwelveHoursInSeconds);
-
-                // Second hand
-                analog_SecondHand.transform.eulerAngles = new Vector3(0, 0, -((timer / ClockMultiplier) / FullRotationDegrees) * TwelveHoursInSeconds);
+                modeValue = timer;
+                segmentValue = HoursOnTimerStopwatch;
                 break;
             case StopwatchMode:
-                // Hour hand
-                // 12 is used as the Stopwatch uses 60 hour intervals
-                analog_HourHand.transform.eulerAngles = new Vector3(0, 0, -(((stopwatch / (ClockMultiplier * MinutesInHour)) / HoursOnTimerStopwatch) / FullRotationDegrees) * TwelveHoursInSeconds);
-
-                // Minute hand
-                analog_MinuteHand.transform.eulerAngles = new Vector3(0, 0, -((stopwatch / (ClockMultiplier * SecondsInMinute)) / FullRotationDegrees) * TwelveHoursInSeconds);
-
-                // Second hand
-                analog_SecondHand.transform.eulerAngles = new Vector3(0, 0, -((stopwatch / ClockMultiplier) / FullRotationDegrees) * TwelveHoursInSeconds);
+                modeValue = stopwatch;
+                segmentValue = HoursOnTimerStopwatch;
                 break;
         }
+
+        // Use of euler angles for clock hands reference: https://www.youtube.com/watch?v=pbTysQw-WNs
+        // Hour hand
+        analog_HourHand.transform.eulerAngles = new Vector3(0, 0, -(((modeValue / (ClockMultiplier * MinutesInHour)) / segmentValue) / FullRotationDegrees) * TwelveHoursInSeconds);
+        // Minute hand
+        analog_MinuteHand.transform.eulerAngles = new Vector3(0, 0, -((modeValue / (ClockMultiplier * SecondsInMinute)) / FullRotationDegrees) * TwelveHoursInSeconds);
+        // Second hand
+        analog_SecondHand.transform.eulerAngles = new Vector3(0, 0, -((modeValue / ClockMultiplier) / FullRotationDegrees) * TwelveHoursInSeconds);
+
+        Debug.Log(time);
     }
 
     // Displays the time, timer or stopwatch value as speficied format (digital)
@@ -709,26 +718,24 @@ public class Clock : MonoBehaviour
                 switch (timeDropdown.captionText.text)
                 {
                     case TwentyFour_HourMinuteFormat:
-                        numberText.text = string.Format(HourMinuteDisplay,
-                                           ((timeInt / SecondsInMinute) / MinutesInHour), ((timeInt / SecondsInMinute) % MinutesInHour));
+                        DisplayDigital(HourMinuteDisplay, timeInt);
                         break;
                     case Twelve_HourMinuteFormat:
                         // Check time period to see if hour values need to be reduced for 12hr time
                         if (period == TimePeriod.PM)
-                            Adjust12HourTimeShortFormat(timeIntPM);
+                            Adjust12HourTime(timeIntPM, HourMinuteDisplay);
                         else
-                            Adjust12HourTimeShortFormat(timeInt);
+                            Adjust12HourTime(timeInt, HourMinuteDisplay);
                         break;
                     case TwentyFour_HourMinuteSecondsFormat:
-                        numberText.text = string.Format(HourMinuteSecondDisplay,
-                                   ((timeInt / SecondsInMinute) / MinutesInHour), ((timeInt / SecondsInMinute) % MinutesInHour), (timeInt % SecondsInMinute));
+                        DisplayDigital(HourMinuteSecondDisplay, timeInt);                    
                         break;
                     case Twelve_HourMinuteSecondsFormat:
                         // Check time period to see if hour values need to be reduced for 12hr time
                         if (period == TimePeriod.PM)
-                            Adjust12HourTimeLongFormat(timeIntPM);
+                            Adjust12HourTime(timeIntPM, HourMinuteSecondDisplay);
                         else
-                            Adjust12HourTimeLongFormat(timeInt);
+                            Adjust12HourTime(timeInt, HourMinuteSecondDisplay);
                         break;
                 }
 
@@ -738,8 +745,8 @@ public class Clock : MonoBehaviour
 
                 // Displays the timer value in 00:00:00 format if timer value is 0 or greater
                 if (timerInt >= 0)
-                    numberText.text = string.Format(HourMinuteSecondDisplay,
-                                    ((timerInt / SecondsInMinute) / MinutesInHour), ((timerInt / SecondsInMinute) % MinutesInHour), (timerInt % SecondsInMinute));
+                    DisplayDigital(HourMinuteSecondDisplay, timerInt);
+
                 break;
             case StopwatchMode:
                 int stopwatchInt = (int)stopwatch;
@@ -749,43 +756,49 @@ public class Clock : MonoBehaviour
                 int stopwatchIntDecimals = (int)stopwatchDecimals;
 
                 // Displays the stopwatch value in 00:00:00.00 format
-                numberText.text = string.Format(HourMinuteSecondMillisecondDisplay,
-                                    ((stopwatchInt / SecondsInMinute) / MinutesInHour), ((stopwatchInt / SecondsInMinute) % MinutesInHour), 
-                                    (stopwatchInt % SecondsInMinute), (stopwatchIntDecimals % MillisecondsInSecond));
+                DisplayDigital(HourMinuteSecondMillisecondDisplay, stopwatchInt, false, stopwatchIntDecimals);
+
                 break;
         }
     }
 
-    // Check if 0 hrs and convert display to 12 instead (for 00:00 format)
-    private void Adjust12HourTimeShortFormat(int timeInt)
+    // Check if 0 hrs and convert display to 12 instead 
+    private void Adjust12HourTime(int timeInt, string format)
     {
-        int tempTime = timeInt + TwelveHoursInSeconds;
-
         // Uses tempTime (additional 12hrs added to time) while the hour is 0 to display 12:00
         if (((timeInt / SecondsInMinute) / MinutesInHour) == 0)
-            numberText.text = string.Format(HourMinuteDisplay,
-                       ((tempTime / SecondsInMinute) / MinutesInHour), ((timeInt / SecondsInMinute) % MinutesInHour));
+            DisplayDigital(format, timeInt, true);
 
         // Displays the actual time while the hour is not 0
         else
-            numberText.text = string.Format(HourMinuteDisplay,
-                       ((timeInt / SecondsInMinute) / MinutesInHour), ((timeInt / SecondsInMinute) % MinutesInHour));
+            DisplayDigital(format, timeInt);
     }
 
-    // Check if 0 hrs and convert display to 12 instead (for 00:00:00 format)
-    private void Adjust12HourTimeLongFormat(int timeInt)
+    // Displays the digital display, using parameters for format (e.g. 00:00, 00:00:00, etc), modeValue (time, timer or stopwatch as an integer), tempValue (whether the hour is at 0 or not)
+    // and stopwatchIntDecimals (the decimal values as an int for the stopwatch)
+    private void DisplayDigital(string format, int modeValue, bool tempVal = false, int stopwatchIntDecimals = 0)
     {
-        int tempTime = timeInt + TwelveHoursInSeconds;
+        int usedHourModeValue;
 
-        // Uses tempTime (additional 12hrs added to time) while the hour is 0 to display 12:00:00
-        if (((timeInt / SecondsInMinute) / MinutesInHour) == 0)
-            numberText.text = string.Format(HourMinuteSecondDisplay,
-                ((tempTime / SecondsInMinute) / MinutesInHour), ((timeInt / SecondsInMinute) % MinutesInHour), (timeInt % SecondsInMinute));
-
-        // Displays the actual time while the hour is not 0
+        if (tempVal)
+            usedHourModeValue = modeValue + TwelveHoursInSeconds;
         else
-            numberText.text = string.Format(HourMinuteSecondDisplay,
-                ((timeInt / SecondsInMinute) / MinutesInHour), ((timeInt / SecondsInMinute) % MinutesInHour), (timeInt % SecondsInMinute));
+            usedHourModeValue = modeValue;
+
+        // Check the type of format used for this display and set appropriately
+        switch (format)
+        {
+            case HourMinuteDisplay:
+                numberText.text = string.Format(format, ((usedHourModeValue / SecondsInMinute) / MinutesInHour), ((modeValue / SecondsInMinute) % MinutesInHour));
+                break;
+            case HourMinuteSecondDisplay:
+                numberText.text = string.Format(format, ((usedHourModeValue / SecondsInMinute) / MinutesInHour), ((modeValue / SecondsInMinute) % MinutesInHour), (modeValue % SecondsInMinute));
+                break;
+            case HourMinuteSecondMillisecondDisplay:
+                numberText.text = string.Format(HourMinuteSecondMillisecondDisplay, ((modeValue / SecondsInMinute) / MinutesInHour), ((modeValue / SecondsInMinute) % MinutesInHour),
+                    (modeValue % SecondsInMinute), (stopwatchIntDecimals % MillisecondsInSecond));
+                break;
+        }
     }
 
     // Update is called once per frame
