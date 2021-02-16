@@ -122,6 +122,8 @@ public class Clock : MonoBehaviour
     private const string Twelve_HourMinuteFormat = "hh:mm (12hr)";
     private const string TwentyFour_HourMinuteSecondsFormat = "hh:mm:ss (24hr)";
     private const string Twelve_HourMinuteSecondsFormat = "hh:mm:ss (12hr)";
+    private const string AM = "AM";
+    private const string PM = "PM";
  
     // Format display contants (each width represents the needed rect transform width for 00:00, 00:00:00 and 00:00:00.00 formats)
     private const int ShortWidth = 37;
@@ -132,7 +134,6 @@ public class Clock : MonoBehaviour
     private void Awake()
     {
         clockManager = GetComponentInParent<ClockManager>();
-        clockManager.GenerateNewPosition(gameObject);
 
         source = GetComponent<AudioSource>();
         source.clip = timerSound;
@@ -230,6 +231,11 @@ public class Clock : MonoBehaviour
         numberText = digital_Numbers.GetComponent<TextMeshProUGUI>();
         numberTransform = numberText.GetComponent<RectTransform>();
         periodText = digital_Period.GetComponent<TextMeshProUGUI>();
+    }
+
+    public void OnEnable()
+    {
+        clockManager.GenerateNewPosition(gameObject);
 
         // Set default values
         timeRunning = true;
@@ -701,13 +707,17 @@ public class Clock : MonoBehaviour
 
                 // If time is less than or equal to 12 hours in seconds, change the time period
                 if (time >= 0 && time < TwelveHoursInSeconds && period == TimePeriod.PM)
+                {
                     period = TimePeriod.AM;
+                    periodText.text = AM;
+                }
 
                 // If time is greater than than or equal to 24 hours in seconds, change the time period
                 else if (time >= TwelveHoursInSeconds && time < (TwelveHoursInSeconds * 2) && period == TimePeriod.AM)
+                {
                     period = TimePeriod.PM;
-
-                periodText.text = period.ToString();
+                    periodText.text = PM;
+                }
 
                 // If time pasts 24hr, refresh to 0
                 if (time >= TwentyFourHoursInSeconds)

@@ -5,13 +5,14 @@ using UnityEngine.UI;
 
 public class ClockManager : MonoBehaviour
 {
-    public GameObject clockPrefab;
-    private Collider2D clockPrefabCollider;
+    public Button spawnClockButton;
 
-    private List<GameObject> spawnedClocks;
-
+    // Components
     private GridLayoutGroup grid;
-    private Toggle gridViewToggle;
+    private Pooler pooler;
+
+    // Visible clocks in scene
+    private List<GameObject> spawnedClocks;
 
     private const int HalfClockWidthAndHeight = 50;
 
@@ -21,33 +22,35 @@ public class ClockManager : MonoBehaviour
         spawnedClocks = new List<GameObject>();
 
         grid = GetComponent<GridLayoutGroup>();
+        pooler = GetComponent<Pooler>();
 
-        clockPrefabCollider = clockPrefab.GetComponent<Collider2D>();
-        clockPrefabCollider.enabled = true;
-
-        // Find the clock already in the scene and add it to the list of spawned clocks
-        GameObject initialClock = GetComponentInChildren<Clock>().gameObject;
-        spawnedClocks.Add(initialClock);
+        // Spawn first clock
+        SpawnClock();
 
         // Stop the user from interacting with the remove button (until new clock is spawned)
-        spawnedClocks[0].GetComponentInChildren<Button>().interactable = false;
+        spawnedClocks[0].GetComponentInChildren<Button>().interactable = false;  
     }
 
     //	Instantiates a new clock, using a clock prefab passed into this script and adds the clock to the list of spawned clocks.
     public void SpawnClock()
     {
-        // Cap number of clocks allowed to be spawned at 32 if on grid view
-        if (spawnedClocks.Count >= 32 && grid.enabled) { }
+        GameObject newClock = pooler.SpawnClockFromPool();
 
-        else
+        // Only run the follwing code if clock was spawned
+        if (newClock)
         {
-            GameObject newClock = Instantiate(clockPrefab, transform);
             spawnedClocks.Add(newClock);
-        }
 
-        // Allow for any clock to be removed if there is more than one clock in the scene
-        if (spawnedClocks.Count > 1)
-            spawnedClocks[0].GetComponentInChildren<Button>().interactable = true;
+            // Allow for any clock to be removed if there is more than one clock in the scene
+            if (spawnedClocks.Count == 2)
+                spawnedClocks[0].GetComponentInChildren<Button>().interactable = true;
+
+            // Stop clock spawns at 32 clocks
+            else if (spawnedClocks.Count == 32)
+                spawnClockButton.interactable = false;
+
+            newClock.transform.SetAsLastSibling();
+        }
     }
 
     // Generate a position that does not collide with another clock
@@ -64,22 +67,50 @@ public class ClockManager : MonoBehaviour
     public void RemoveClock(GameObject clock)
     {
         spawnedClocks.Remove(clock);
-        Destroy(clock);
+        clock.SetActive(false);
+
+        pooler.clockPool.Enqueue(clock);
 
         // Stop the user from removing the last clock in the scene 
         if (spawnedClocks.Count == 1)
             spawnedClocks[0].GetComponentInChildren<Button>().interactable = false;
+
+        // Allow clock spawns at 31 or less clocks
+        if (spawnedClocks.Count == 31)
+            spawnClockButton.interactable = true;
     }
 
     // Turn on/off every clock's collider based on Autofit Toggle setting
     public void ToggleAutofit()
     {
-        clockPrefabCollider.enabled = !clockPrefabCollider.enabled;
+        pooler.ToggleClockPrefabCollider();
 
-        foreach (GameObject clock in spawnedClocks)
-        {
-            Collider2D clockCollider = clock.GetComponent<Collider2D>();
+        foreach (Collider2D clockCollider in pooler.allColliders)  
             clockCollider.enabled = !clockCollider.enabled;
+    }
+
+    private float runningTotal = 0f;
+    private int frameCount = 0;
+    private float timer = 0f;
+    public Text fpsText;
+
+    private void Update()
+    {
+        float fps = 1.0f / Time.smoothDeltaTime;
+        timer += Time.deltaTime;
+        float averagefps = runningTotal / frameCount;
+
+        if (timer <= 1.0f)
+        {
+            runningTotal += fps;
+            frameCount++;
+        }
+        else
+        {
+            fpsText.text = averagefps.ToString();
+            runningTotal = 0f;
+            frameCount = 0;
+            timer = 0f;
         }
     }
 }
