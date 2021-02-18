@@ -19,3 +19,7 @@ A simple Unity UI canvas that contains a clock that the player can interact with
 - The reset button will reset the stopwatch to 0.
 
 - The user can exit the application with the 'Quit' button.
+
+- The user can choose to have the clocks spawn into a grid view using 'Grid View' toggle
+
+- The user can choose to have the clocks collide using 'Autofit (Collide)' toggle
